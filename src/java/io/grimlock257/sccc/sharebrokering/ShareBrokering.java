@@ -1,9 +1,11 @@
 package io.grimlock257.sccc.sharebrokering;
 
-import javax.jws.WebService;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
+import io.grimlock257.sccc.jaxb.binding.Stock;
+import io.grimlock257.sccc.sharebrokering.manager.JAXBFileManager;
+import java.util.List;
 import javax.ejb.Stateless;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
 
 /**
  * @author Adam Watson
@@ -12,8 +14,8 @@ import javax.ejb.Stateless;
 @Stateless()
 public class ShareBrokering {
 
-    @WebMethod(operationName = "hello")
-    public String hello(@WebParam(name = "name") String txt) {
-        return "Hello " + txt + " !";
+    @WebMethod(operationName = "getAllStocks")
+    public List<Stock> getAllStocks() {
+        return JAXBFileManager.getInstance().unmarshal().getStocks();
     }
 }

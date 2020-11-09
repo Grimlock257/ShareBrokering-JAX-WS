@@ -51,8 +51,9 @@ public class JAXBFileManager {
      * Marshal the provided Stocks object to the local XML file
      *
      * @param stocks The Stocks object to be marshaled
+     * @return Whether the marshal was successful or not
      */
-    public void marshal(Stocks stocks) {
+    public Boolean marshal(Stocks stocks) {
 
         try {
 
@@ -68,8 +69,13 @@ public class JAXBFileManager {
                 marshaller.marshal(stocks, new File(xmlFileLocation));
             }
         } catch (JAXBException e) {
+
             System.err.println("[ERROR} Could not create JAXBContext instance: " + e.getMessage());
+
+            return false;
         }
+
+        return true;
     }
 
     /**

@@ -56,4 +56,23 @@ public class ShareBrokering {
 
         return false;
     }
+
+    @WebMethod(operationName = "sellShare")
+    public Boolean sellShare(
+            @WebParam(name = "companySymbol") String companySymbol,
+            @WebParam(name = "quantity") double quantity
+    ) {
+
+        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+
+        for (Stock stock : stocks.getStocks()) {
+            if (stock.getStockSymbol().equalsIgnoreCase(companySymbol)) {
+                stock.setAvailableShares(stock.getAvailableShares() + quantity);
+
+                return JAXBFileManager.getInstance().marshal(stocks);
+            }
+        }
+
+        return false;
+    }
 }

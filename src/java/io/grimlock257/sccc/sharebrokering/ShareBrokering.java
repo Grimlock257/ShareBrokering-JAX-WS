@@ -35,20 +35,20 @@ public class ShareBrokering {
      * the changed XML.
      *
      * @param companySymbol
-     * @param purchaseQuantity
+     * @param quantity
      * @return
      */
     @WebMethod(operationName = "purchaseShare")
     public Boolean purchaseShare(
             @WebParam(name = "companySymbol") String companySymbol,
-            @WebParam(name = "purchaseQuantity") double purchaseQuantity
+            @WebParam(name = "quantity") double quantity
     ) {
 
         Stocks stocks = JAXBFileManager.getInstance().unmarshal();
 
         for (Stock stock : stocks.getStocks()) {
-            if (stock.getStockSymbol().equalsIgnoreCase(companySymbol) && stock.getAvailableShares() >= purchaseQuantity) {
-                stock.setAvailableShares(stock.getAvailableShares() - purchaseQuantity);
+            if (stock.getStockSymbol().equalsIgnoreCase(companySymbol) && stock.getAvailableShares() >= quantity) {
+                stock.setAvailableShares(stock.getAvailableShares() - quantity);
 
                 return JAXBFileManager.getInstance().marshal(stocks);
             }

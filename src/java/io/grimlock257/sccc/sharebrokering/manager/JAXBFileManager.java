@@ -71,4 +71,33 @@ public class JAXBFileManager {
             System.err.println("[ERROR} Could not create JAXBContext instance: " + e.getMessage());
         }
     }
+
+    /**
+     * Unmarshal the list and return the root Stocks element
+     *
+     * @return The unmarshalled Stocks object
+     */
+    public Stocks unmarshal() {
+
+        try {
+
+            JAXBContext jaxbContext = JAXBContext.newInstance(Stocks.class.getPackage().getName());
+
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+            Stocks stocks;
+
+            // Apply a file lock at this point so that when the file is being unmarshalled, no other
+            // file operations can happen at the same time
+            synchronized (fileLock) {
+                stocks = (Stocks) unmarshaller.unmarshal(new File(xmlFileLocation));
+            }
+
+            return stocks;
+        } catch (JAXBException e) {
+            System.err.println("[ERROR} Could not create JAXBContext instance: " + e.getMessage());
+        }
+
+        return null;
+    }
 }

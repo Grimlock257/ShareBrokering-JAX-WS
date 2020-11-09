@@ -17,7 +17,7 @@
         <xsd:sequence>
             <xsd:element name="StockName" type="xsd:string"/>
             <xsd:element name="StockSymbol" type="xsd:string"/>
-            <xsd:element name="AvailableShares" type="xsd:int" />
+            <xsd:element name="AvailableShares" type="xsd:double" />
             <xsd:element name="Price" type="tns:SharePrice"/>
         </xsd:sequence>
     </xsd:complexType>
@@ -25,7 +25,7 @@
     <xsd:complexType name="SharePrice">
         <xsd:sequence>
             <xsd:element name="Currency" type="xsd:string"/>
-            <xsd:element name="Price" type="xsd:float"/>
+            <xsd:element name="Price" type="xsd:double"/>
             <xsd:element name="Updated" type="xsd:date"/>
         </xsd:sequence>
     </xsd:complexType>

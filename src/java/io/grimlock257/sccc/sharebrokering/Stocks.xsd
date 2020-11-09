@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<xsd:schema version="1.0"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:tns="http://grimlock257.github.io/Stocks"
+            targetNamespace="http://grimlock257.github.io/Stocks"
+            elementFormDefault="qualified">
+
+    <xsd:element name="Stock">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="Stocks" type="tns:Stock" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="Stock">
+        <xsd:sequence>
+            <xsd:element name="StockName" type="xsd:string"/>
+            <xsd:element name="StockSymbol" type="xsd:string"/>
+            <xsd:element name="AvailableShares" type="xsd:int" />
+            <xsd:element name="Price" type="tns:SharePrice"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="SharePrice">
+        <xsd:sequence>
+            <xsd:element name="Currency" type="xsd:string"/>
+            <xsd:element name="Price" type="xsd:float"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+</xsd:schema>

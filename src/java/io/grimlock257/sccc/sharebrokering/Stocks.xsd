@@ -26,7 +26,7 @@
         <xsd:sequence>
             <xsd:element name="Currency" type="xsd:string"/>
             <xsd:element name="Price" type="xsd:double"/>
-            <xsd:element name="Updated" type="xsd:date"/>
+            <xsd:element name="Updated" type="xsd:dateTime"/>
         </xsd:sequence>
     </xsd:complexType>
 

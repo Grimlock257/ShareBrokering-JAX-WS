@@ -30,6 +30,28 @@ public class ShareBrokering {
     }
 
     /**
+     * Unmarshalls the Stocks XML file and looks for a Stock with the
+     * provided stock symbol
+     *
+     * @param companySymbol The symbol to search for
+     * @return The Stock object for the given companySymbol
+     */
+    @WebMethod(operationName = "getStockBySymbol")
+    public Stock getStockBySymbol(
+            @WebParam(name = "companySymbol") String companySymbol
+    ) {
+        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+
+        for (Stock stock : stocks.getStocks()) {
+            if (StringUtil.isNotNullOrEmpty(companySymbol) && stock.getStockSymbol().equalsIgnoreCase(companySymbol)) {
+                return stock;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Unmarshalls the Stocks XML file, then iterates over each stock, checking
      * the symbol of that stock compared to the provided stock symbol, and that
      * the amount of available shares is greater or equal to the desired

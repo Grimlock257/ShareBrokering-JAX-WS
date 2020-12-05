@@ -282,6 +282,60 @@ public class ShareBrokering {
     }
 
     /**
+     * Modify the Stock information for the supplied symbol if it exists
+     *
+     * @param stockName The new stock name
+     * @param currentStockSymbol The current stock symbol, used to search record
+     * @param newStockSymbol The new stock symbol
+     * @param availableShares The new amount of shares
+     * @return Whether the stock modification was successful or not
+     */
+    @WebMethod(operationName = "modifyShare")
+    public boolean modifyShare(
+            @WebParam(name = "stockName") String stockName,
+            @WebParam(name = "currentStockSymbol") String currentStockSymbol,
+            @WebParam(name = "newStockSymbol") String newStockSymbol,
+            @WebParam(name = "availableShares") double availableShares
+    ) {
+        // Unmarshall stocks, find the stock with the supplied currentStockSymbol, edit the stock and remarshall
+        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        List<Stock> stocksList = stocks.getStocks();
+
+        boolean foundStock = false;
+        boolean madeEdit = false;
+
+        // Iterae over the list, if matching stock found, update information if provided
+        for (Stock stock : stocksList) {
+            if (stock.getStockSymbol().equalsIgnoreCase(currentStockSymbol)) {
+                foundStock = true;
+
+                if (StringUtil.isNotNullOrEmpty(stockName)) {
+                    stock.setStockName(stockName);
+                    madeEdit = true;
+                }
+
+                if (StringUtil.isNotNullOrEmpty(newStockSymbol)) {
+                    stock.setStockSymbol(newStockSymbol);
+                    madeEdit = true;
+                }
+
+                if (availableShares >= 0) {
+                    stock.setAvailableShares(availableShares);
+                    madeEdit = true;
+                }
+
+                break;
+            }
+        }
+
+        if (foundStock && madeEdit) {
+            return JAXBFileManager.getInstance().marshal(stocks);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Retrieve the stock price information from the remote web service for the provided stock symbol
      *
      * @param symbol The stock symbol for which to retrieve stock price information for

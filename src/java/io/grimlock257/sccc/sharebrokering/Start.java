@@ -1,5 +1,6 @@
 package io.grimlock257.sccc.sharebrokering;
 
+import io.grimlock257.sccc.sharebrokering.jobs.StockPriceUpdater;
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -11,8 +12,11 @@ import javax.ejb.Startup;
 @Startup
 public class Start {
 
+    /**
+     * This method will run before the web service container starts up
+     */
     @PostConstruct
     public void init() {
-        // This method runs at startup
+        StockPriceUpdater.initiate();
     }
 }

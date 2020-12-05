@@ -73,11 +73,11 @@ public class StockPriceUpdater {
 
                 boolean result = JAXBFileManager.getInstance().marshal(stocks);
 
-                if (!result) {
+                if (result) {
+                    System.out.println("Stock price update successful");
+                } else {
                     System.err.println("Error marshalling updated stock price file");
                 }
-
-                System.out.println("Stock price update successful");
             }
         }, STOCK_PRICE_INITIAL_DELAY, STOCK_PRICE_UPDATE_FREQUENCY);
     }

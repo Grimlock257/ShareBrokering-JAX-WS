@@ -1,5 +1,9 @@
 package io.grimlock257.sccc.sharebrokering;
 
+import io.github.grimlock257.stocks.StockPrice;
+import io.github.grimlock257.stocks.StockPriceResponse;
+import io.github.grimlock257.stocks.StockPriceSoap;
+import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
 import io.grimlock257.sccc.sharebrokering.manager.JAXBFileManager;
@@ -214,5 +218,56 @@ public class ShareBrokering {
         }
 
         return filteredStocks;
+    }
+
+    /**
+     * Creates a new Stock object based on the provided values, then unmarshalls the
+     * Stocks XML file, retrieves the list and adds the new Stock object before
+     * marshalling the file again.
+     *
+     * @param stockName The company name of the new stock
+     * @param stockSymbol The symbol for the new stock
+     * @param availableShares The amount of available shares for the new stock
+     * @return Whether the stock addition was successful or not
+     */
+    @WebMethod(operationName = "addShare")
+    public boolean addShare(
+            @WebParam(name = "stockName") String stockName,
+            @WebParam(name = "stockSymbol") String stockSymbol,
+            @WebParam(name = "availableShares") double availableShares
+    ) {
+        // Create new Stock object based on supplied information
+        StockPriceResponse stockPrice = getSharePrice(stockSymbol);
+
+        SharePrice sharePrice = new SharePrice();
+        sharePrice.setCurrency(stockPrice.getStockCurrency());
+        sharePrice.setPrice(stockPrice.getStockPrice());
+        sharePrice.setUpdated(stockPrice.getStockPriceTime());
+
+        Stock stock = new Stock();
+        stock.setAvailableShares(availableShares);
+        stock.setStockName(stockName);
+        stock.setStockSymbol(stockSymbol);
+        stock.setPrice(sharePrice);
+
+        // Unmarshall stocks, add the new Stock and remarshall
+        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        List<Stock> stocksList = stocks.getStocks();
+        stocksList.add(stock);
+
+        return JAXBFileManager.getInstance().marshal(stocks);
+    }
+
+    /**
+     * Retrieve the stock price information from the remote web service for the provided stock symbol
+     *
+     * @param symbol The stock symbol for which to retrieve stock price information for
+     * @return The share price, currency and updated time contained within a StockPriceResponse object
+     */
+    private StockPriceResponse getSharePrice(String symbol) {
+        StockPrice service = new StockPrice();
+        StockPriceSoap port = service.getStockPriceSoap();
+
+        return port.getSharePrice(symbol);
     }
 }

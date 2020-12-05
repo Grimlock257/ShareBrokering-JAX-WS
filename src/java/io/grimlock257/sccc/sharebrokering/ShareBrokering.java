@@ -259,6 +259,29 @@ public class ShareBrokering {
     }
 
     /**
+     * Remove the Stock with the supplied symbol if it exists
+     *
+     * @param stockSymbol The symbol for which to delete
+     * @return Whether the stock deletion was successful or not
+     */
+    @WebMethod(operationName = "deleteShare")
+    public boolean deleteShare(
+            @WebParam(name = "stockSymbol") String stockSymbol
+    ) {
+        // Unmarshall stocks, find the stock with the supplied symbol, remove the stock and remarshall
+        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        List<Stock> stocksList = stocks.getStocks();
+
+        boolean wasRemoved = stocksList.removeIf(stock -> stock.getStockSymbol().equalsIgnoreCase(stockSymbol));
+
+        if (wasRemoved) {
+            return JAXBFileManager.getInstance().marshal(stocks);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Retrieve the stock price information from the remote web service for the provided stock symbol
      *
      * @param symbol The stock symbol for which to retrieve stock price information for

@@ -149,7 +149,6 @@ public class ShareBrokering {
 
         return stocks
                 .stream()
-                .parallel()
                 .filter(stock -> isNotNullOrEmpty(stockName) ? containsIgnoreCase(stock.getStockName(), stockName) : true)
                 .filter(stock -> isNotNullOrEmpty(stockSymbol) ? containsIgnoreCase(stock.getStockSymbol(), stockSymbol) : true)
                 .filter(stock -> isNotNullOrEmpty(currency) ? stock.getPrice().getCurrency().equalsIgnoreCase(currency) : true)

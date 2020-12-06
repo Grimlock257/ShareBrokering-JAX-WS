@@ -8,9 +8,12 @@ import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
 import io.grimlock257.sccc.sharebrokering.manager.JAXBFileManager;
 import io.grimlock257.sccc.sharebrokering.util.StringUtil;
-import java.util.ArrayList;
+import static io.grimlock257.sccc.sharebrokering.util.StringUtil.containsIgnoreCase;
+import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpty;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -143,81 +146,57 @@ public class ShareBrokering {
     ) {
 
         List<Stock> stocks = JAXBFileManager.getInstance().unmarshal().getStocks();
-        List<Stock> filteredStocks = new ArrayList<>();
 
-        for (Stock stock : stocks) {
-            if (StringUtil.isNotNullOrEmpty(stockName) && !StringUtil.containsIgnoreCase(stock.getStockName(), stockName)) {
-                continue;
-            }
+        return stocks
+                .stream()
+                .parallel()
+                .filter(stock -> isNotNullOrEmpty(stockName) ? containsIgnoreCase(stock.getStockName(), stockName) : true)
+                .filter(stock -> isNotNullOrEmpty(stockSymbol) ? containsIgnoreCase(stock.getStockSymbol(), stockSymbol) : true)
+                .filter(stock -> isNotNullOrEmpty(currency) ? stock.getPrice().getCurrency().equalsIgnoreCase(currency) : true)
+                .filter(stock -> isNotNullOrEmpty(sharePriceFilter) && sharePrice >= 0 && sharePriceFilter.equalsIgnoreCase("lessOrEqual") ? (stock.getPrice().getPrice() <= sharePrice) : true)
+                .filter(stock -> isNotNullOrEmpty(sharePriceFilter) && sharePrice >= 0 && sharePriceFilter.equalsIgnoreCase("equal") ? (stock.getPrice().getPrice() == sharePrice) : true)
+                .filter(stock -> isNotNullOrEmpty(sharePriceFilter) && sharePrice >= 0 && sharePriceFilter.equalsIgnoreCase("greaterOrEqual") ? (stock.getPrice().getPrice() >= sharePrice) : true)
+                .sorted(getStockSearchComparator(sortBy, order))
+                .collect(Collectors.toList());
+    }
 
-            if (StringUtil.isNotNullOrEmpty(stockSymbol) && !StringUtil.containsIgnoreCase(stock.getStockSymbol(), stockSymbol)) {
-                continue;
-            }
+    /**
+     * Create a Comparator object for comparing Stocks for some given sort field and order method
+     *
+     * @param <T> A Stock object
+     * @param <U> Some comparable property of the Stock object that will be used to sort
+     * @param sortBy The column in which the results should be ordered by
+     * @param order Whether to order the sortBy column ascending or descending
+     * @return The Comparator object that can sort Stocks
+     */
+    private <T, U extends Comparable<U>> Comparator<T> getStockSearchComparator(String sortBy, String order) {
+        // Store a function reference which takes a Stock and returns some Object
+        Function<Stock, ? extends Object> sortFunction;
 
-            if (StringUtil.isNotNullOrEmpty(currency) && !stock.getPrice().getCurrency().equalsIgnoreCase(currency)) {
-                continue;
-            }
-
-            if (StringUtil.isNotNullOrEmpty(sharePriceFilter) && sharePrice >= 0) {
-                switch (sharePriceFilter) {
-                    case "lessOrEqual":
-                        if (stock.getPrice().getPrice() > sharePrice) {
-                            continue;
-                        }
-
-                        break;
-                    case "equal":
-                        if (stock.getPrice().getPrice() != sharePrice) {
-                            continue;
-                        }
-
-                        break;
-                    case "greaterOrEqual":
-                        if (stock.getPrice().getPrice() < sharePrice) {
-                            continue;
-                        }
-
-                        break;
-                }
-            }
-
-            filteredStocks.add(stock);
+        // Determine the sort function based on the sortBy parameter
+        switch (sortBy) {
+            case "stockName":
+                sortFunction = stock -> stock.getStockName();
+                break;
+            case "shareCurrency":
+                sortFunction = stock -> stock.getPrice().getCurrency();
+                break;
+            case "sharePrice":
+                sortFunction = stock -> stock.getPrice().getPrice();
+                break;
+            default:
+                sortFunction = stock -> stock.getStockSymbol();
         }
 
-        if (StringUtil.isNotNullOrEmpty(sortBy)) {
-            switch (sortBy) {
-                case "stockName":
-                    if (StringUtil.isNotNullOrEmpty(order) && order.equalsIgnoreCase("desc")) {
-                        filteredStocks.sort(Comparator.comparing(Stock::getStockName).reversed());
-                    } else {
-                        filteredStocks.sort(Comparator.comparing(Stock::getStockName));
-                    }
-                    break;
-                case "stockSymbol":
-                    if (StringUtil.isNotNullOrEmpty(order) && order.equalsIgnoreCase("desc")) {
-                        filteredStocks.sort(Comparator.comparing(Stock::getStockSymbol).reversed());
-                    } else {
-                        filteredStocks.sort(Comparator.comparing(Stock::getStockSymbol));
-                    }
-                    break;
-                case "shareCurrency":
-                    if (StringUtil.isNotNullOrEmpty(order) && order.equalsIgnoreCase("desc")) {
-                        filteredStocks.sort(Comparator.comparing((Stock stock) -> stock.getPrice().getCurrency()).reversed());
-                    } else {
-                        filteredStocks.sort(Comparator.comparing(stock -> stock.getPrice().getCurrency()));
-                    }
-                    break;
-                case "sharePrice":
-                    if (StringUtil.isNotNullOrEmpty(order) && order.equalsIgnoreCase("desc")) {
-                        filteredStocks.sort(Comparator.comparing((Stock stock) -> stock.getPrice().getPrice()).reversed());
-                    } else {
-                        filteredStocks.sort(Comparator.comparing(stock -> stock.getPrice().getPrice()));
-                    }
-                    break;
-            }
-        }
+        // Cast the sort function back to a fully generic sort function, as requried by the Comparator.comparing function
+        Function<T, U> genericSortFunction = (Function<T, U>) sortFunction;
 
-        return filteredStocks;
+        // Return a comparator using the sort function determined above, reverse if the order is set to "desc"
+        if (isNotNullOrEmpty(order) && order.equalsIgnoreCase("desc")) {
+            return Comparator.comparing(genericSortFunction).reversed();
+        } else {
+            return Comparator.comparing(genericSortFunction);
+        }
     }
 
     /**

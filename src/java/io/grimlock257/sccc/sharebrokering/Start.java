@@ -11,6 +11,7 @@ import io.grimlock257.sccc.sharebrokering.manager.JAXBFileManager;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
@@ -29,6 +30,14 @@ public class Start {
         setupDummyData();
 
         StockPriceUpdater.initiate();
+    }
+
+    /**
+     * This method will run before the web service shuts down
+     */
+    @PreDestroy
+    public void destroy() {
+        StockPriceUpdater.getInstance().cancel();
     }
 
     /**

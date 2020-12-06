@@ -47,6 +47,20 @@ public class StockPriceUpdater {
     }
 
     /**
+     * Get the instance of the StockPriceUpdater singleton
+     *
+     * @return The instance of the StockPriceUpdater
+     */
+    public static StockPriceUpdater getInstance() {
+
+        if (instance == null) {
+            instance = new StockPriceUpdater();
+        }
+
+        return instance;
+    }
+
+    /**
      * Set up stock price updater task to run every STOCK_PRICE_UPDATE_FREQUENCY (in seconds) to retrieve the up to date stock price information from the remote web service
      */
     private void setupStockPriceUpdaterTask() {
@@ -80,6 +94,15 @@ public class StockPriceUpdater {
                 }
             }
         }, STOCK_PRICE_INITIAL_DELAY, STOCK_PRICE_UPDATE_FREQUENCY);
+    }
+
+    /**
+     * Forcefully cancel the timer task
+     */
+    public void cancel() {
+        stockPriceUpdaterTime.cancel();
+        stockPriceUpdaterTime.purge();
+        stockPriceUpdaterTime = null;
     }
 
     /**

@@ -6,10 +6,17 @@ import io.github.grimlock257.stocks.StockPriceSoap;
 import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
+import io.grimlock257.sccc.jaxb.binding.users.Role;
+import io.grimlock257.sccc.jaxb.binding.users.User;
+import io.grimlock257.sccc.jaxb.binding.users.Users;
 import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
+import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
 import io.grimlock257.sccc.sharebrokering.util.StringUtil;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.containsIgnoreCase;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpty;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
@@ -18,6 +25,7 @@ import javax.ejb.Stateless;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -315,6 +323,70 @@ public class ShareBrokering {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Handle user registration
+     *
+     * @param firstName The first name of the new user
+     * @param lastName The last name of the new user
+     * @param username The unique username of the user
+     * @param password The raw password of the user
+     * @param currency The currency of the user funds
+     * @param availableFunds The amount of available user funds
+     * @return Whether user creation was successful or not
+     */
+    @WebMethod(operationName = "registerUser")
+    public boolean registerUser(
+            @WebParam(name = "firstName") String firstName,
+            @WebParam(name = "lastName") String lastName,
+            @WebParam(name = "username") String username,
+            @WebParam(name = "password") String password,
+            @WebParam(name = "currency") String currency,
+            @WebParam(name = "availableFunds") double availableFunds
+    ) {
+        // Make sure username already present in the system
+        Users users = UsersFileManager.getInstance().unmarshal();
+        List<User> usersList = users.getUsers();
+
+        if (usersList.stream().anyMatch(user -> user.getUsername().equalsIgnoreCase(username))) {
+            return false;
+        }
+
+        // Create a MD5 hash of the password
+        String hashedPassword;
+
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] passwordsBytes = password.getBytes("UTF-8");
+            byte[] hashedPasswordBytes = md5.digest(passwordsBytes);
+
+            hashedPassword = DatatypeConverter.printHexBinary(hashedPasswordBytes);
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("[ShareBrokering JAX-WS] MD5 algorithm not found when hashing user password. " + e.getMessage());
+
+            return false;
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("[ShareBrokering JAX-WS] Unsupported encoding when hashing user password. " + e.getMessage());
+
+            return false;
+        }
+
+        // Create the new User object, and set properties
+        User user = new User();
+
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setUsername(username);
+        user.setPassword(hashedPassword);
+        user.setRole(Role.USER);
+        user.setCurrency(currency);
+        user.setAvailableFunds(availableFunds);
+
+        // Add the new User and marshall
+        usersList.add(user);
+
+        return UsersFileManager.getInstance().marshal(users);
     }
 
     /**

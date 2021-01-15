@@ -215,7 +215,7 @@ public class ShareBrokering {
             sharePrice.setPrice(stockPrice.getStockPrice());
             sharePrice.setUpdated(stockPrice.getStockPriceTime());
         } catch (WebServiceException e) {
-            System.err.println("WebServiceException connecting to stock price SOAP service resulting in failure to add new share. " + e.getMessage());
+            System.err.println("[ShareBrokering JAX-WS] WebServiceException connecting to stock price SOAP service resulting in failure to add new share. " + e.getMessage());
 
             return false;
         }
@@ -280,7 +280,7 @@ public class ShareBrokering {
         boolean foundStock = false;
         boolean madeEdit = false;
 
-        // Iterae over the list, if matching stock found, update information if provided
+        // Iterate over the list, if matching stock found, update information if provided
         for (Stock stock : stocksList) {
             if (stock.getStockSymbol().equalsIgnoreCase(currentStockSymbol)) {
                 foundStock = true;

@@ -70,7 +70,7 @@ public class Start {
                 try {
                     stockPrice = getSharePrice(initialStock.getStockSymbol());
                 } catch (WebServiceException e) {
-                    System.err.println("WebServiceException connecting to stock price SOAP service resulting in failure to retrieve initial stock price. " + e.getMessage());
+                    System.err.println("[ShareBrokering JAX-WS] WebServiceException connecting to stock price SOAP service resulting in failure to retrieve initial stock price. " + e.getMessage());
 
                     continue;
                 }

@@ -70,7 +70,7 @@ public class StockPriceUpdater {
         stockPriceUpdaterTime.schedule(new TimerTask() {
             @Override
             public void run() {
-                System.out.println("Updating stock prices...");
+                System.out.println("[ShareBrokering JAX-WS] Updating stock prices...");
 
                 Stocks stocks = JAXBFileManager.getInstance().unmarshal();
                 List<Stock> stocksList = stocks.getStocks();
@@ -81,7 +81,7 @@ public class StockPriceUpdater {
                     try {
                         stockPrice = getSharePrice(stock.getStockSymbol());
                     } catch (WebServiceException e) {
-                        System.err.println("WebServiceException connecting to stock price SOAP service resulting in failure to update stock price. " + e.getMessage());
+                        System.err.println("[ShareBrokering JAX-WS] WebServiceException connecting to stock price SOAP service resulting in failure to update stock price for " + stock.getStockSymbol() + ". " + e.getMessage());
 
                         continue;
                     }
@@ -97,9 +97,9 @@ public class StockPriceUpdater {
                 boolean result = JAXBFileManager.getInstance().marshal(stocks);
 
                 if (result) {
-                    System.out.println("Stock price update successful");
+                    System.out.println("[ShareBrokering JAX-WS] Stock price update successful");
                 } else {
-                    System.err.println("Error marshalling updated stock price file");
+                    System.err.println("[ShareBrokering JAX-WS] Error marshalling updated stock price file");
                 }
             }
         }, STOCK_PRICE_INITIAL_DELAY, STOCK_PRICE_UPDATE_FREQUENCY);

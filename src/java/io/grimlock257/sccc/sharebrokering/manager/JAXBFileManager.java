@@ -2,8 +2,6 @@ package io.grimlock257.sccc.sharebrokering.manager;
 
 import io.grimlock257.sccc.jaxb.binding.Stocks;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -70,7 +68,7 @@ public class JAXBFileManager {
             }
         } catch (JAXBException e) {
 
-            System.err.println("[ERROR} Could not create JAXBContext instance: " + e.getMessage());
+            System.err.println("[ERROR] Could not create JAXBContext instance: " + e.getMessage());
 
             return false;
         }
@@ -101,7 +99,7 @@ public class JAXBFileManager {
 
             return stocks;
         } catch (JAXBException e) {
-            System.err.println("[ERROR} Could not create JAXBContext instance: " + e.getMessage());
+            System.err.println("[ERROR] Could not create JAXBContext instance: " + e.getMessage());
         }
 
         return null;

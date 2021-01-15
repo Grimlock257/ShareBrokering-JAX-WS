@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author Adam Watson
@@ -64,7 +65,15 @@ public class Start {
 
             // Iterate over the list of initial stock data and create proper stock objects from them
             for (InitialStock initialStock : initialStocks) {
-                StockPriceResponse stockPrice = getSharePrice(initialStock.getStockSymbol());
+                StockPriceResponse stockPrice;
+
+                try {
+                    stockPrice = getSharePrice(initialStock.getStockSymbol());
+                } catch (WebServiceException e) {
+                    System.err.println("WebServiceException connecting to stock price SOAP service resulting in failure to retrieve initial stock price. " + e.getMessage());
+
+                    continue;
+                }
 
                 SharePrice sharePrice = new SharePrice();
                 sharePrice.setCurrency(stockPrice.getStockCurrency());

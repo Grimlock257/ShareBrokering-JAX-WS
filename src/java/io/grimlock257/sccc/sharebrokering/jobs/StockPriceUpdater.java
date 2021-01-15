@@ -10,6 +10,7 @@ import io.grimlock257.sccc.sharebrokering.manager.JAXBFileManager;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.xml.ws.WebServiceException;
 
 /**
  * StockPriceUpdater
@@ -75,7 +76,15 @@ public class StockPriceUpdater {
                 List<Stock> stocksList = stocks.getStocks();
 
                 for (Stock stock : stocksList) {
-                    StockPriceResponse stockPrice = getSharePrice(stock.getStockSymbol());
+                    StockPriceResponse stockPrice;
+
+                    try {
+                        stockPrice = getSharePrice(stock.getStockSymbol());
+                    } catch (WebServiceException e) {
+                        System.err.println("WebServiceException connecting to stock price SOAP service resulting in failure to update stock price. " + e.getMessage());
+
+                        continue;
+                    }
 
                     SharePrice sharePrice = new SharePrice();
                     sharePrice.setCurrency(stockPrice.getStockCurrency());

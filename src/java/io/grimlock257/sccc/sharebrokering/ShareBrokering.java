@@ -38,8 +38,7 @@ public class ShareBrokering {
     }
 
     /**
-     * Unmarshalls the Stocks XML file and looks for a Stock with the
-     * provided stock symbol
+     * Unmarshalls the Stocks XML file and looks for a Stock with the provided stock symbol
      *
      * @param companySymbol The symbol to search for
      * @return The Stock object for the given companySymbol
@@ -60,12 +59,8 @@ public class ShareBrokering {
     }
 
     /**
-     * Unmarshalls the Stocks XML file, then iterates over each stock, checking
-     * the symbol of that stock compared to the provided stock symbol, and that
-     * the amount of available shares is greater or equal to the desired
-     * quantity to purchase. If both these criteria are met, reduce the
-     * available shares by the purchase quantity amount, and attempt to marshal
-     * the changed XML.
+     * Unmarshalls the Stocks XML file, then iterates over each stock, checking the symbol of that stock compared to the provided stock symbol, and that the amount of available shares is greater or
+     * equal to the desired quantity to purchase. If both these criteria are met, reduce the available shares by the purchase quantity amount, and attempt to marshal the changed XML.
      *
      * @param companySymbol The symbol of the company to purchase shares from
      * @param quantity The amount of shares to purchase
@@ -91,10 +86,8 @@ public class ShareBrokering {
     }
 
     /**
-     * Unmarshalls the Stocks XML file, then iterates over each stock, checking
-     * the symbol of that stock compared to the provided stock symbol. If this
-     * criteria is met, then increase the available shares by the sell quantity
-     * amount, and attempt to marshal the changed XML
+     * Unmarshalls the Stocks XML file, then iterates over each stock, checking the symbol of that stock compared to the provided stock symbol. If this criteria is met, then increase the available
+     * shares by the sell quantity amount, and attempt to marshal the changed XML
      *
      * @param companySymbol The symbol of the company to sell shares to
      * @param quantity The amount of shares to sell
@@ -120,11 +113,9 @@ public class ShareBrokering {
     }
 
     /**
-     * Unmarshalls the Stocks XML file, then iterates over each stock, checking
-     * it against a set of criteria. The checks within check if the stock has
-     * <b>failed</b> against a criteria. If the end of the iteration is reached,
-     * the stock in question is added to a list to be returned to the caller.
-     * The results are finally sorted by the column and order specified.
+     * Unmarshalls the Stocks XML file, then iterates over each stock, checking it against a set of criteria. The checks within check if the stock has
+     * <b>failed</b> against a criteria. If the end of the iteration is reached, the stock in question is added to a list to be returned to the caller. The results are finally sorted by the column and
+     * order specified.
      *
      * @param stockName See if value is contained in any stock names
      * @param stockSymbol See if value is contained in any stock symbols
@@ -200,9 +191,7 @@ public class ShareBrokering {
     }
 
     /**
-     * Creates a new Stock object based on the provided values, then unmarshalls the
-     * Stocks XML file, retrieves the list and adds the new Stock object before
-     * marshalling the file again.
+     * Creates a new Stock object based on the provided values, then unmarshalls the Stocks XML file, retrieves the list and adds the new Stock object before marshalling the file again.
      *
      * @param stockName The company name of the new stock
      * @param stockSymbol The symbol for the new stock

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<xsd:schema version="1.0"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:tns="http://grimlock257.github.io/Stocks/Users"
+            targetNamespace="http://grimlock257.github.io/Stocks/Users"
+            elementFormDefault="qualified">
+
+    <xsd:element name="Users">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="Users" type="tns:User" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:complexType name="User">
+        <xsd:sequence>
+            <xsd:element name="FirstName" type="xsd:string"/>
+            <xsd:element name="LastName" type="xsd:string"/>
+            <xsd:element name="Username" type="xsd:string"/>
+            <xsd:element name="Password" type="xsd:string"/>
+            <xsd:element name="Role" type="tns:Role"/>
+            <xsd:element name="Currency" type="xsd:string"/>
+            <xsd:element name="AvailableFunds" type="xsd:double"/>
+            <xsd:element name="Shares" type="tns:Share" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="Role">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Admin" />
+            <xsd:enumeration value="User" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="Share">
+        <xsd:sequence>
+            <xsd:element name="StockSymbol" type="xsd:string"/>
+            <xsd:element name="Quantity" type="xsd:double" />
+            <xsd:element name="PurchaseValue" type="xsd:double"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+</xsd:schema>

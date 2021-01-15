@@ -18,6 +18,7 @@ import javax.ejb.Stateless;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author Adam Watson
@@ -215,12 +216,20 @@ public class ShareBrokering {
             @WebParam(name = "availableShares") double availableShares
     ) {
         // Create new Stock object based on supplied information
-        StockPriceResponse stockPrice = getSharePrice(stockSymbol);
-
         SharePrice sharePrice = new SharePrice();
-        sharePrice.setCurrency(stockPrice.getStockCurrency());
-        sharePrice.setPrice(stockPrice.getStockPrice());
-        sharePrice.setUpdated(stockPrice.getStockPriceTime());
+
+        // Attempt to retrieve price for the stock price SOAP web service, if failure, return false as stock addition could not be completed
+        try {
+            StockPriceResponse stockPrice = getSharePrice(stockSymbol);
+
+            sharePrice.setCurrency(stockPrice.getStockCurrency());
+            sharePrice.setPrice(stockPrice.getStockPrice());
+            sharePrice.setUpdated(stockPrice.getStockPriceTime());
+        } catch (WebServiceException e) {
+            System.err.println("WebServiceException connecting to stock price SOAP service resulting in failure to add new share. " + e.getMessage());
+
+            return false;
+        }
 
         Stock stock = new Stock();
         stock.setAvailableShares(availableShares);

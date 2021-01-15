@@ -204,6 +204,14 @@ public class ShareBrokering {
             @WebParam(name = "stockSymbol") String stockSymbol,
             @WebParam(name = "availableShares") double availableShares
     ) {
+        // Make sure stock symbol isn't already present in the system
+        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        List<Stock> stocksList = stocks.getStocks();
+
+        if (stocksList.stream().anyMatch(stock -> stock.getStockSymbol().equalsIgnoreCase(stockSymbol))) {
+            return false;
+        }
+
         // Create new Stock object based on supplied information
         SharePrice sharePrice = new SharePrice();
 
@@ -226,9 +234,7 @@ public class ShareBrokering {
         stock.setStockSymbol(stockSymbol);
         stock.setPrice(sharePrice);
 
-        // Unmarshall stocks, add the new Stock and remarshall
-        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
-        List<Stock> stocksList = stocks.getStocks();
+        // Add the new Stock and marshall
         stocksList.add(stock);
 
         return JAXBFileManager.getInstance().marshal(stocks);

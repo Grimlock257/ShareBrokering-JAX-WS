@@ -11,6 +11,7 @@ import io.grimlock257.sccc.jaxb.binding.users.User;
 import io.grimlock257.sccc.jaxb.binding.users.Users;
 import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
 import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
+import io.grimlock257.sccc.sharebrokering.model.LoginResponse;
 import io.grimlock257.sccc.sharebrokering.util.StringUtil;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.containsIgnoreCase;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpty;
@@ -19,6 +20,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -355,21 +358,9 @@ public class ShareBrokering {
         }
 
         // Create a MD5 hash of the password
-        String hashedPassword;
+        String hashedPassword = hashPassword(password);
 
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            byte[] passwordsBytes = password.getBytes("UTF-8");
-            byte[] hashedPasswordBytes = md5.digest(passwordsBytes);
-
-            hashedPassword = DatatypeConverter.printHexBinary(hashedPasswordBytes);
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("[ShareBrokering JAX-WS] MD5 algorithm not found when hashing user password. " + e.getMessage());
-
-            return false;
-        } catch (UnsupportedEncodingException e) {
-            System.err.println("[ShareBrokering JAX-WS] Unsupported encoding when hashing user password. " + e.getMessage());
-
+        if (hashedPassword == null) {
             return false;
         }
 
@@ -389,6 +380,63 @@ public class ShareBrokering {
         usersList.add(user);
 
         return UsersFileManager.getInstance().marshal(users);
+    }
+
+    /**
+     * Attempt to validate the user details against the stored results
+     *
+     * @param username The provided username
+     * @param password The provided password
+     * @return A LoginResponse object containing whether it was successful or not, if so will contain GUID and role
+     */
+    @WebMethod(operationName = "loginUser")
+    public LoginResponse loginUser(
+            @WebParam(name = "username") String username,
+            @WebParam(name = "password") String password
+    ) {
+        // Check username is present in the system
+        Users users = UsersFileManager.getInstance().unmarshal();
+        List<User> usersList = users.getUsers();
+
+        // Attempt to find the user
+        try {
+            User user = usersList.stream().filter(u -> u.getUsername().equalsIgnoreCase(username)).findFirst().get();
+
+            // If the user was found, hash the provided input and check against stored file
+            String hashedPassword = hashPassword(password);
+
+            if (user.getPassword().equals(hashedPassword)) {
+                return LoginResponse.successfulResponse(user.getGuid(), user.getRole());
+            } else {
+                return LoginResponse.unsuccessfulResponse();
+            }
+        } catch (NoSuchElementException e) {
+            return LoginResponse.unsuccessfulResponse();
+        }
+    }
+
+    /**
+     * Hash the provided password using the MD5 algorithm
+     *
+     * @param password The password to hash
+     * @return The hashed password, or null if something went wrong
+     */
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] passwordsBytes = password.getBytes("UTF-8");
+            byte[] hashedPasswordBytes = md5.digest(passwordsBytes);
+
+            return DatatypeConverter.printHexBinary(hashedPasswordBytes);
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("[ShareBrokering JAX-WS] MD5 algorithm not found when hashing user password. " + e.getMessage());
+
+            return null;
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("[ShareBrokering JAX-WS] Unsupported encoding when hashing user password. " + e.getMessage());
+
+            return null;
+        }
     }
 
     /**

@@ -6,7 +6,7 @@ import io.github.grimlock257.stocks.StockPriceSoap;
 import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
-import io.grimlock257.sccc.sharebrokering.manager.JAXBFileManager;
+import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -72,7 +72,7 @@ public class StockPriceUpdater {
             public void run() {
                 System.out.println("[ShareBrokering JAX-WS] Updating stock prices...");
 
-                Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+                Stocks stocks = StocksFileManager.getInstance().unmarshal();
                 List<Stock> stocksList = stocks.getStocks();
 
                 for (Stock stock : stocksList) {
@@ -94,7 +94,7 @@ public class StockPriceUpdater {
                     stock.setPrice(sharePrice);
                 }
 
-                boolean result = JAXBFileManager.getInstance().marshal(stocks);
+                boolean result = StocksFileManager.getInstance().marshal(stocks);
 
                 if (result) {
                     System.out.println("[ShareBrokering JAX-WS] Stock price update successful");

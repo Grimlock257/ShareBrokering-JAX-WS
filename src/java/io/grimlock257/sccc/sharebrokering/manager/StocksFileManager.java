@@ -8,15 +8,15 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 /**
- * JAXBFileManager
- *
- * This class handles marshalling and unmarshalling of the stocks XML files
+ * StocksFileManager
+
+ This class handles marshalling and unmarshalling of the stocks XML files
  *
  * @author Adam Watson
  */
-public class JAXBFileManager {
+public class StocksFileManager {
 
-    private static JAXBFileManager instance = null;
+    private static StocksFileManager instance = null;
 
     private final String xmlFileLocation;
 
@@ -27,19 +27,19 @@ public class JAXBFileManager {
      *
      * Private to enforce singleton behaviour
      */
-    private JAXBFileManager() {
+    private StocksFileManager() {
         xmlFileLocation = "stocks.xml";
     }
 
     /**
-     * Get the instance of the JAXBFileManager singleton
+     * Get the instance of the StocksFileManager singleton
      *
-     * @return The instance of the JAXBFileManager
+     * @return The instance of the StocksFileManager
      */
-    public static JAXBFileManager getInstance() {
+    public static StocksFileManager getInstance() {
 
         if (instance == null) {
-            instance = new JAXBFileManager();
+            instance = new StocksFileManager();
         }
 
         return instance;

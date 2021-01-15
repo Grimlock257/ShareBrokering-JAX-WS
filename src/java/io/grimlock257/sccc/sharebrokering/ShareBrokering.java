@@ -6,7 +6,7 @@ import io.github.grimlock257.stocks.StockPriceSoap;
 import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
-import io.grimlock257.sccc.sharebrokering.manager.JAXBFileManager;
+import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
 import io.grimlock257.sccc.sharebrokering.util.StringUtil;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.containsIgnoreCase;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpty;
@@ -34,7 +34,7 @@ public class ShareBrokering {
      */
     @WebMethod(operationName = "getAllStocks")
     public List<Stock> getAllStocks() {
-        return JAXBFileManager.getInstance().unmarshal().getStocks();
+        return StocksFileManager.getInstance().unmarshal().getStocks();
     }
 
     /**
@@ -47,7 +47,7 @@ public class ShareBrokering {
     public Stock getStockBySymbol(
             @WebParam(name = "companySymbol") String companySymbol
     ) {
-        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        Stocks stocks = StocksFileManager.getInstance().unmarshal();
 
         for (Stock stock : stocks.getStocks()) {
             if (StringUtil.isNotNullOrEmpty(companySymbol) && stock.getStockSymbol().equalsIgnoreCase(companySymbol)) {
@@ -72,13 +72,13 @@ public class ShareBrokering {
             @WebParam(name = "quantity") double quantity
     ) {
 
-        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        Stocks stocks = StocksFileManager.getInstance().unmarshal();
 
         for (Stock stock : stocks.getStocks()) {
             if (stock.getStockSymbol().equalsIgnoreCase(companySymbol) && stock.getAvailableShares() >= quantity) {
                 stock.setAvailableShares(stock.getAvailableShares() - quantity);
 
-                return JAXBFileManager.getInstance().marshal(stocks);
+                return StocksFileManager.getInstance().marshal(stocks);
             }
         }
 
@@ -99,13 +99,13 @@ public class ShareBrokering {
             @WebParam(name = "quantity") double quantity
     ) {
 
-        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        Stocks stocks = StocksFileManager.getInstance().unmarshal();
 
         for (Stock stock : stocks.getStocks()) {
             if (stock.getStockSymbol().equalsIgnoreCase(companySymbol)) {
                 stock.setAvailableShares(stock.getAvailableShares() + quantity);
 
-                return JAXBFileManager.getInstance().marshal(stocks);
+                return StocksFileManager.getInstance().marshal(stocks);
             }
         }
 
@@ -137,7 +137,7 @@ public class ShareBrokering {
             @WebParam(name = "order") String order
     ) {
 
-        List<Stock> stocks = JAXBFileManager.getInstance().unmarshal().getStocks();
+        List<Stock> stocks = StocksFileManager.getInstance().unmarshal().getStocks();
 
         return stocks
                 .stream()
@@ -205,7 +205,7 @@ public class ShareBrokering {
             @WebParam(name = "availableShares") double availableShares
     ) {
         // Make sure stock symbol isn't already present in the system
-        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        Stocks stocks = StocksFileManager.getInstance().unmarshal();
         List<Stock> stocksList = stocks.getStocks();
 
         if (stocksList.stream().anyMatch(stock -> stock.getStockSymbol().equalsIgnoreCase(stockSymbol))) {
@@ -237,7 +237,7 @@ public class ShareBrokering {
         // Add the new Stock and marshall
         stocksList.add(stock);
 
-        return JAXBFileManager.getInstance().marshal(stocks);
+        return StocksFileManager.getInstance().marshal(stocks);
     }
 
     /**
@@ -251,13 +251,13 @@ public class ShareBrokering {
             @WebParam(name = "stockSymbol") String stockSymbol
     ) {
         // Unmarshall stocks, find the stock with the supplied symbol, remove the stock and remarshall
-        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        Stocks stocks = StocksFileManager.getInstance().unmarshal();
         List<Stock> stocksList = stocks.getStocks();
 
         boolean wasRemoved = stocksList.removeIf(stock -> stock.getStockSymbol().equalsIgnoreCase(stockSymbol));
 
         if (wasRemoved) {
-            return JAXBFileManager.getInstance().marshal(stocks);
+            return StocksFileManager.getInstance().marshal(stocks);
         } else {
             return false;
         }
@@ -280,7 +280,7 @@ public class ShareBrokering {
             @WebParam(name = "availableShares") double availableShares
     ) {
         // Unmarshall stocks, find the stock with the supplied currentStockSymbol, edit the stock and remarshall
-        Stocks stocks = JAXBFileManager.getInstance().unmarshal();
+        Stocks stocks = StocksFileManager.getInstance().unmarshal();
         List<Stock> stocksList = stocks.getStocks();
 
         boolean foundStock = false;
@@ -311,7 +311,7 @@ public class ShareBrokering {
         }
 
         if (foundStock && madeEdit) {
-            return JAXBFileManager.getInstance().marshal(stocks);
+            return StocksFileManager.getInstance().marshal(stocks);
         } else {
             return false;
         }

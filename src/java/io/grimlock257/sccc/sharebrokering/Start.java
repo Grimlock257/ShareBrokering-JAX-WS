@@ -7,7 +7,7 @@ import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
 import io.grimlock257.sccc.sharebrokering.jobs.StockPriceUpdater;
-import io.grimlock257.sccc.sharebrokering.manager.JAXBFileManager;
+import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -45,7 +45,7 @@ public class Start {
      * Set up dummy data at web service start if no shares.xml file is found
      */
     private void setupDummyData() {
-        if (JAXBFileManager.getInstance().unmarshal() == null) {
+        if (StocksFileManager.getInstance().unmarshal() == null) {
             // Create new Stocks object that will be marshalled
             Stocks stocks = new Stocks();
             List<Stock> stocksList = stocks.getStocks();
@@ -89,7 +89,7 @@ public class Start {
                 stocksList.add(stock);
             }
 
-            JAXBFileManager.getInstance().marshal(stocks);
+            StocksFileManager.getInstance().marshal(stocks);
         }
     }
 

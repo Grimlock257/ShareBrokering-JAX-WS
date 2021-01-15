@@ -6,8 +6,10 @@ import io.github.grimlock257.stocks.StockPriceSoap;
 import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
+import io.grimlock257.sccc.jaxb.binding.users.Users;
 import io.grimlock257.sccc.sharebrokering.jobs.StockPriceUpdater;
 import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
+import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -29,6 +31,7 @@ public class Start {
     @PostConstruct
     public void init() {
         setupDummyData();
+        createInitialUsersFile();
 
         StockPriceUpdater.initiate();
     }
@@ -125,6 +128,15 @@ public class Start {
 
         public double getShareAmount() {
             return shareAmount;
+        }
+    }
+
+    /**
+     * Create initial users file if it doesn't already exist
+     */
+    private void createInitialUsersFile() {
+        if (UsersFileManager.getInstance().unmarshal() == null) {
+            UsersFileManager.getInstance().marshal(new Users());
         }
     }
 

@@ -19,6 +19,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.ejb.Stateless;
@@ -375,6 +376,7 @@ public class ShareBrokering {
         // Create the new User object, and set properties
         User user = new User();
 
+        user.setGuid(UUID.randomUUID().toString());
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setUsername(username);

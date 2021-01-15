@@ -416,6 +416,78 @@ public class ShareBrokering {
     }
 
     /**
+     * Deposit an amount to the users available funds
+     *
+     * @param guid The GUID of the account to deposit funds to
+     * @param amount The amount of funds to deposit
+     * @return Whether the deposit was successful or not
+     */
+    @WebMethod(operationName = "depositFunds")
+    public boolean depositFunds(
+            @WebParam(name = "guid") String guid,
+            @WebParam(name = "amount") double amount
+    ) {
+        // Disallow depositing negative amounts and zero
+        if (amount <= 0) {
+            return false;
+        }
+
+        // Check username is present in the system
+        Users users = UsersFileManager.getInstance().unmarshal();
+        List<User> usersList = users.getUsers();
+
+        // Attempt to find the user
+        try {
+            User user = usersList.stream().filter(u -> u.getGuid().equalsIgnoreCase(guid)).findFirst().get();
+
+            user.setAvailableFunds(user.getAvailableFunds() + amount);
+
+            return UsersFileManager.getInstance().marshal(users);
+        } catch (NoSuchElementException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Withdraw an amount from the users available funds
+     *
+     * @param guid The GUID of the account to withdraw funds to
+     * @param amount The amount of funds to withdraw
+     * @return Whether the withdrawal was successful or not
+     */
+    @WebMethod(operationName = "withdrawFunds")
+    public boolean withdrawFunds(
+            @WebParam(name = "guid") String guid,
+            @WebParam(name = "amount") double amount
+    ) {
+        // Disallow withdrawing negative amounts and zero
+        if (amount <= 0) {
+            return false;
+        }
+
+        // Check username is present in the system
+        Users users = UsersFileManager.getInstance().unmarshal();
+        List<User> usersList = users.getUsers();
+
+        // Attempt to find the user
+        try {
+            User user = usersList.stream().filter(u -> u.getGuid().equalsIgnoreCase(guid)).findFirst().get();
+
+            double availableFunds = user.getAvailableFunds();
+
+            if (availableFunds >= amount) {
+                user.setAvailableFunds(user.getAvailableFunds() - amount);
+
+                return UsersFileManager.getInstance().marshal(users);
+            } else {
+                return false;
+            }
+        } catch (NoSuchElementException e) {
+            return false;
+        }
+    }
+
+    /**
      * Hash the provided password using the MD5 algorithm
      *
      * @param password The password to hash

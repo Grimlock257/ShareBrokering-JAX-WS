@@ -40,6 +40,8 @@ public class UserUtils {
 
                         share.setQuantity(share.getQuantity() + quantity);
                         share.setPurchaseValue(share.getPurchaseValue() + purchasePrice * quantity);
+
+                        break;
                     }
                 }
 
@@ -94,6 +96,8 @@ public class UserUtils {
                             share.setQuantity(share.getQuantity() - quantity);
                             share.setPurchaseValue(share.getPurchaseValue() - purchasePrice * quantity);
                         }
+
+                        break;
                     }
                 }
 

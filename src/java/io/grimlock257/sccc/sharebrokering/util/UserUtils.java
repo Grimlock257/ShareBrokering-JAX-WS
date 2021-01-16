@@ -95,14 +95,14 @@ public class UserUtils {
                             share.setPurchaseValue(share.getPurchaseValue() - purchasePrice * quantity);
                         }
                     }
-
-                    // Attempted to sell a share the user does not own, don't bother marshalling
-                    if (!hasShareAlready) {
-                        return false;
-                    }
-
-                    return UsersFileManager.getInstance().marshal(users);
                 }
+
+                // Attempted to sell a share the user does not own, don't bother marshalling
+                if (!hasShareAlready) {
+                    return false;
+                }
+
+                return UsersFileManager.getInstance().marshal(users);
             }
         }
 

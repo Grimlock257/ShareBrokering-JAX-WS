@@ -337,7 +337,6 @@ public class ShareBrokering {
      * @param username The unique username of the user
      * @param password The raw password of the user
      * @param currency The currency of the user funds
-     * @param availableFunds The amount of available user funds
      * @return Whether user creation was successful or not
      */
     @WebMethod(operationName = "registerUser")
@@ -346,8 +345,7 @@ public class ShareBrokering {
             @WebParam(name = "lastName") String lastName,
             @WebParam(name = "username") String username,
             @WebParam(name = "password") String password,
-            @WebParam(name = "currency") String currency,
-            @WebParam(name = "availableFunds") double availableFunds
+            @WebParam(name = "currency") String currency
     ) {
         // Make sure username already present in the system
         Users users = UsersFileManager.getInstance().unmarshal();
@@ -374,7 +372,7 @@ public class ShareBrokering {
         user.setPassword(hashedPassword);
         user.setRole(Role.USER);
         user.setCurrency(currency);
-        user.setAvailableFunds(availableFunds);
+        user.setAvailableFunds(0);
 
         // Add the new User and marshall
         usersList.add(user);

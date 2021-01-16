@@ -74,6 +74,8 @@ public class StockPriceUpdater {
 
                 Stocks stocks = StocksFileManager.getInstance().unmarshal();
                 List<Stock> stocksList = stocks.getStocks();
+                
+                boolean modified = false;
 
                 for (Stock stock : stocksList) {
                     StockPriceResponse stockPrice;
@@ -92,9 +94,11 @@ public class StockPriceUpdater {
                     sharePrice.setUpdated(stockPrice.getStockPriceTime());
 
                     stock.setPrice(sharePrice);
+                    
+                    modified = true;
                 }
 
-                boolean result = StocksFileManager.getInstance().marshal(stocks);
+                boolean result = (modified) ? StocksFileManager.getInstance().marshal(stocks) : false;
 
                 if (result) {
                     System.out.println("[ShareBrokering JAX-WS] Stock price update successful");

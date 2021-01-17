@@ -12,6 +12,7 @@ import io.grimlock257.sccc.jaxb.binding.users.User;
 import io.grimlock257.sccc.jaxb.binding.users.Users;
 import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
 import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
+import io.grimlock257.sccc.sharebrokering.model.FundsResponse;
 import io.grimlock257.sccc.sharebrokering.model.LoginResponse;
 import io.grimlock257.sccc.sharebrokering.model.UserStock;
 import io.grimlock257.sccc.sharebrokering.util.StringUtil;
@@ -469,6 +470,30 @@ public class ShareBrokering {
             }
         } catch (NoSuchElementException e) {
             return LoginResponse.unsuccessfulResponse();
+        }
+    }
+
+    /**
+     * Retrieve the available funds for the given user
+     *
+     * @param guid The user whose funds to retrieve
+     * @return A FundsReponse object containing available funds and currency, or null if user not found
+     */
+    @WebMethod(operationName = "getUserFunds")
+    public FundsResponse getUserFunds(
+            @WebParam(name = "guid") String guid
+    ) {
+        // Check username is present in the system
+        Users users = UsersFileManager.getInstance().unmarshal();
+        List<User> usersList = users.getUsers();
+
+        // Attempt to find the user
+        try {
+            User user = usersList.stream().filter(u -> u.getGuid().equalsIgnoreCase(guid)).findFirst().get();
+
+            return new FundsResponse(user.getAvailableFunds(), user.getCurrency());
+        } catch (NoSuchElementException e) {
+            return null;
         }
     }
 

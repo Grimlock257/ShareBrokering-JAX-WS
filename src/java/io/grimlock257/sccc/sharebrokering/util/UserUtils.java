@@ -1,9 +1,11 @@
 package io.grimlock257.sccc.sharebrokering.util;
 
+import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.users.Share;
 import io.grimlock257.sccc.jaxb.binding.users.User;
 import io.grimlock257.sccc.jaxb.binding.users.Users;
 import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
+import io.grimlock257.sccc.sharebrokering.service.CurrencyConverterAPIService;
 import java.util.Iterator;
 import java.util.List;
 
@@ -19,16 +21,30 @@ public class UserUtils {
      *
      * @param guid The GUID of the user purchasing a stock
      * @param stockSymbol The stock symbol for the purchased share
-     * @param purchasePrice The unit purchase price for a share
+     * @param sharePriceInformation The SharePrice object for the stock to be purchased
      * @param quantity The quantity of shares purchased
      * @return Whether the addition was successful or not
      */
-    public static boolean tryAddStockToUser(String guid, String stockSymbol, double purchasePrice, double quantity) {
+    public static boolean tryAddStockToUser(String guid, String stockSymbol, SharePrice sharePriceInformation, double quantity) {
         Users users = UsersFileManager.getInstance().unmarshal();
 
         // Iterate over list and look for matching GUID
         for (User user : users.getUsers()) {
             if (user.getGuid().equalsIgnoreCase(guid)) {
+                // Check the user has enough funds to complete the purchase
+                String userFundsCurrency = user.getCurrency();
+                String stockListCurrency = sharePriceInformation.getCurrency();
+                double stockListPrice = sharePriceInformation.getPrice();
+
+                double purchasePrice = CurrencyConverterAPIService.getInstance().convertCurrency(stockListCurrency, userFundsCurrency, stockListPrice * quantity);
+
+                if (purchasePrice < 0 || purchasePrice > user.getAvailableFunds()) {
+                    break;
+                }
+
+                user.setAvailableFunds(user.getAvailableFunds() - purchasePrice);
+
+                // User has funds, proceed with purchase
                 boolean hasShareAlready = false;
 
                 List<Share> userShares = user.getShares();
@@ -39,7 +55,7 @@ public class UserUtils {
                         hasShareAlready = true;
 
                         share.setQuantity(share.getQuantity() + quantity);
-                        share.setPurchaseValue(share.getPurchaseValue() + purchasePrice * quantity);
+                        share.setPurchaseValue(share.getPurchaseValue() + purchasePrice);
 
                         break;
                     }
@@ -49,7 +65,7 @@ public class UserUtils {
                     Share share = new Share();
 
                     share.setStockSymbol(stockSymbol);
-                    share.setPurchaseValue(purchasePrice * quantity);
+                    share.setPurchaseValue(purchasePrice);
                     share.setQuantity(quantity);
 
                     userShares.add(share);
@@ -67,11 +83,11 @@ public class UserUtils {
      *
      * @param guid The GUID of the user purchasing a stock
      * @param stockSymbol The stock symbol for the purchased share
-     * @param purchasePrice The unit purchase price for a share
+     * @param sharePriceInformation The SharePrice object for the stock to be purchased
      * @param quantity The quantity of shares purchased
      * @return Whether the addition was successful or not
      */
-    public static boolean trySellStockFromUser(String guid, String stockSymbol, double purchasePrice, double quantity) {
+    public static boolean trySellStockFromUser(String guid, String stockSymbol, SharePrice sharePriceInformation, double quantity) {
         Users users = UsersFileManager.getInstance().unmarshal();
 
         // Iterate over list and look for matching GUID
@@ -87,6 +103,19 @@ public class UserUtils {
 
                     // User has enough to sell
                     if (share.getStockSymbol().equalsIgnoreCase(stockSymbol) && share.getQuantity() >= quantity) {
+                        // Convert price
+                        String userFundsCurrency = user.getCurrency();
+                        String stockListCurrency = sharePriceInformation.getCurrency();
+                        double stockListPrice = sharePriceInformation.getPrice();
+
+                        double salePrice = CurrencyConverterAPIService.getInstance().convertCurrency(stockListCurrency, userFundsCurrency, stockListPrice * quantity);
+
+                        if (salePrice < 0) {
+                            break;
+                        }
+
+                        user.setAvailableFunds(user.getAvailableFunds() + salePrice);
+
                         hasShareAlready = true;
 
                         // The sale results in the user owning no shares, remove the entry, otherwise edit the existing entry
@@ -94,7 +123,7 @@ public class UserUtils {
                             userSharesIterator.remove();
                         } else {
                             share.setQuantity(share.getQuantity() - quantity);
-                            share.setPurchaseValue(share.getPurchaseValue() - purchasePrice * quantity);
+                            share.setPurchaseValue(share.getPurchaseValue() - salePrice);
                         }
 
                         break;

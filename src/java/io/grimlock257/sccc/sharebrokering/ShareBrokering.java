@@ -138,7 +138,7 @@ public class ShareBrokering {
 
         for (Stock stock : stocks.getStocks()) {
             if (stock.getStockSymbol().equalsIgnoreCase(companySymbol) && stock.getAvailableShares() >= quantity) {
-                if (UserUtils.tryAddStockToUser(guid, stock.getStockSymbol(), stock.getPrice().getPrice(), quantity)) {
+                if (UserUtils.tryAddStockToUser(guid, stock.getStockSymbol(), stock.getPrice(), quantity)) {
                     stock.setAvailableShares(stock.getAvailableShares() - quantity);
 
                     return StocksFileManager.getInstance().marshal(stocks);
@@ -171,7 +171,7 @@ public class ShareBrokering {
 
         for (Stock stock : stocks.getStocks()) {
             if (stock.getStockSymbol().equalsIgnoreCase(companySymbol)) {
-                if (UserUtils.trySellStockFromUser(guid, stock.getStockSymbol(), stock.getPrice().getPrice(), quantity)) {
+                if (UserUtils.trySellStockFromUser(guid, stock.getStockSymbol(), stock.getPrice(), quantity)) {
                     stock.setAvailableShares(stock.getAvailableShares() + quantity);
 
                     return StocksFileManager.getInstance().marshal(stocks);

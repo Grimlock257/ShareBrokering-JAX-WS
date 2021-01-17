@@ -9,8 +9,8 @@ import javax.xml.bind.Unmarshaller;
 
 /**
  * UsersFileManager
-
- This class handles marshalling and unmarshalling of the users XML files
+ *
+ * This class handles marshalling and unmarshalling of the users XML files
  *
  * @author Adam Watson
  */

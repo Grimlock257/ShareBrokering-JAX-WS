@@ -7,11 +7,13 @@ import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
 import io.grimlock257.sccc.jaxb.binding.users.Role;
+import io.grimlock257.sccc.jaxb.binding.users.Share;
 import io.grimlock257.sccc.jaxb.binding.users.User;
 import io.grimlock257.sccc.jaxb.binding.users.Users;
 import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
 import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
 import io.grimlock257.sccc.sharebrokering.model.LoginResponse;
+import io.grimlock257.sccc.sharebrokering.model.UserStock;
 import io.grimlock257.sccc.sharebrokering.util.StringUtil;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.containsIgnoreCase;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpty;
@@ -19,6 +21,7 @@ import io.grimlock257.sccc.sharebrokering.util.UserUtils;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -68,6 +71,50 @@ public class ShareBrokering {
         }
 
         return null;
+    }
+
+    /**
+     * Retrieve stocks information for a given user
+     *
+     * @param guid The GUID of the user whose shares to retrieve information for
+     * @return A List object containing Stock objects
+     */
+    @WebMethod(operationName = "getUserStocks")
+    public List<UserStock> getUserStocks(
+            @WebParam(name = "guid") String guid
+    ) {
+        // Check username is present in the system
+        Users users = UsersFileManager.getInstance().unmarshal();
+
+        for (User user : users.getUsers()) {
+            if (user.getGuid().equalsIgnoreCase(guid)) {
+                List<Share> userShares = user.getShares();
+
+                if (userShares.isEmpty()) {
+                    break;
+                }
+
+                // User has some shares, set up a list to hold return Stock objects
+                List<UserStock> userStocks = new ArrayList<>();
+
+                // Retrieve stock information from stocks file
+                Stocks stocks = StocksFileManager.getInstance().unmarshal();
+
+                for (Share share : userShares) {
+                    for (Stock stock : stocks.getStocks()) {
+                        if (stock.getStockSymbol().equalsIgnoreCase(share.getStockSymbol())) {
+                            UserStock userStock = new UserStock(stock, share, user.getCurrency());
+
+                            userStocks.add(userStock);
+                        }
+                    }
+                }
+
+                return userStocks;
+            }
+        }
+
+        return new ArrayList<>();
     }
 
     /**

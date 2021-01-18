@@ -17,13 +17,13 @@ import java.util.List;
 public class UserUtils {
 
     /**
-     * Add a Share to a user
+     * Add Share(s) to a user
      *
      * @param guid The GUID of the user purchasing a stock
      * @param stockSymbol The stock symbol for the purchased share
      * @param sharePriceInformation The SharePrice object for the stock to be purchased
      * @param quantity The quantity of shares purchased
-     * @return Whether the addition was successful or not
+     * @return Whether the purchase was successful or not
      */
     public static boolean tryAddStockToUser(String guid, String stockSymbol, SharePrice sharePriceInformation, double quantity) {
         Users users = UsersFileManager.getInstance().unmarshal();
@@ -79,13 +79,13 @@ public class UserUtils {
     }
 
     /**
-     * Add a Share to a user
+     * Remove Share(s) from a user
      *
-     * @param guid The GUID of the user purchasing a stock
-     * @param stockSymbol The stock symbol for the purchased share
-     * @param sharePriceInformation The SharePrice object for the stock to be purchased
-     * @param quantity The quantity of shares purchased
-     * @return Whether the addition was successful or not
+     * @param guid The GUID of the user selling a stock
+     * @param stockSymbol The stock symbol for the sold share
+     * @param sharePriceInformation The SharePrice object for the stock to be sold
+     * @param quantity The quantity of shares sold
+     * @return Whether the sale was successful or not
      */
     public static boolean trySellStockFromUser(String guid, String stockSymbol, SharePrice sharePriceInformation, double quantity) {
         Users users = UsersFileManager.getInstance().unmarshal();

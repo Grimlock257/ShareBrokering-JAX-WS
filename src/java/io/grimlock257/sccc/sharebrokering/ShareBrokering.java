@@ -379,9 +379,37 @@ public class ShareBrokering {
         Stocks stocks = StocksFileManager.getInstance().unmarshal();
         List<Stock> stocksList = stocks.getStocks();
 
+        Stock theStock = stocksList
+                .stream()
+                .filter(stock -> stock.getStockSymbol().equalsIgnoreCase(stockSymbol))
+                .findFirst()
+                .get();
+
         boolean wasRemoved = stocksList.removeIf(stock -> stock.getStockSymbol().equalsIgnoreCase(stockSymbol));
 
         if (wasRemoved) {
+            // See if any users owned the now deleted stock, and force a sale if so
+            Users users = UsersFileManager.getInstance().unmarshal();
+
+            List<User> usersWithShare = users.getUsers()
+                    .stream()
+                    .filter(user -> user.getShares()
+                    .stream()
+                    .anyMatch(share -> share.getStockSymbol().equalsIgnoreCase(stockSymbol)))
+                    .collect(Collectors.toList());
+
+            usersWithShare.forEach((user) -> {
+                Share userShare = user.getShares()
+                        .stream()
+                        .filter(stock -> stock.getStockSymbol().equalsIgnoreCase(stockSymbol))
+                        .findFirst()
+                        .get();
+
+                if (!UserUtils.trySellStockFromUser(user.getGuid(), stockSymbol, theStock.getPrice(), userShare.getQuantity())) {
+                    System.err.println("[ShareBrokering JAX-WS] Error attempting to force sell user stock upon stock removal. User '" + user.getGuid() + "' has '" + theStock.getStockSymbol() + "' that aren't present in the system any more.");
+                }
+            });
+
             return StocksFileManager.getInstance().marshal(stocks);
         } else {
             return false;

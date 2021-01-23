@@ -18,6 +18,7 @@ import io.grimlock257.sccc.sharebrokering.model.UserStock;
 import io.grimlock257.sccc.sharebrokering.util.StringUtil;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.containsIgnoreCase;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpty;
+import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNullOrEmpty;
 import io.grimlock257.sccc.sharebrokering.util.UserUtils;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -63,11 +64,15 @@ public class ShareBrokering {
     public Stock getStockBySymbol(
             @WebParam(name = "companySymbol") String companySymbol
     ) {
-        Stocks stocks = StocksFileManager.getInstance().unmarshal();
 
-        for (Stock stock : stocks.getStocks()) {
-            if (StringUtil.isNotNullOrEmpty(companySymbol) && stock.getStockSymbol().equalsIgnoreCase(companySymbol)) {
-                return stock;
+        // Only attempt to find stock by symbol if a symbol was supplied
+        if (isNotNullOrEmpty(companySymbol)) {
+            Stocks stocks = StocksFileManager.getInstance().unmarshal();
+
+            for (Stock stock : stocks.getStocks()) {
+                if (stock.getStockSymbol().equalsIgnoreCase(companySymbol)) {
+                    return stock;
+                }
             }
         }
 
@@ -84,6 +89,15 @@ public class ShareBrokering {
     public List<UserStock> getUserStocks(
             @WebParam(name = "guid") String guid
     ) {
+
+        // Set up list to store user stocks
+        List<UserStock> userStocks = new ArrayList<>();
+
+        // Validate parameters
+        if (isNullOrEmpty(guid)) {
+            return userStocks;
+        }
+
         // Check username is present in the system
         Users users = UsersFileManager.getInstance().unmarshal();
 
@@ -95,10 +109,7 @@ public class ShareBrokering {
                     break;
                 }
 
-                // User has some shares, set up a list to hold return Stock objects
-                List<UserStock> userStocks = new ArrayList<>();
-
-                // Retrieve stock information from stocks file
+                // User has some shares, retrieve stock information from stocks file
                 Stocks stocks = StocksFileManager.getInstance().unmarshal();
 
                 for (Share share : userShares) {
@@ -115,7 +126,7 @@ public class ShareBrokering {
             }
         }
 
-        return new ArrayList<>();
+        return userStocks;
     }
 
     /**
@@ -133,6 +144,15 @@ public class ShareBrokering {
             @WebParam(name = "companySymbol") String companySymbol,
             @WebParam(name = "quantity") double quantity
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(guid) || isNullOrEmpty(companySymbol)) {
+            return false;
+        }
+
+        if (quantity <= 0) {
+            return false;
+        }
 
         Stocks stocks = StocksFileManager.getInstance().unmarshal();
 
@@ -166,6 +186,15 @@ public class ShareBrokering {
             @WebParam(name = "companySymbol") String companySymbol,
             @WebParam(name = "quantity") double quantity
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(guid) || isNullOrEmpty(companySymbol)) {
+            return false;
+        }
+
+        if (quantity <= 0) {
+            return false;
+        }
 
         Stocks stocks = StocksFileManager.getInstance().unmarshal();
 
@@ -209,6 +238,16 @@ public class ShareBrokering {
             @WebParam(name = "order") String order
     ) {
 
+        // Set defaults
+        if (isNullOrEmpty(sortBy)) {
+            sortBy = "stockSymbol";
+        }
+
+        if (isNullOrEmpty(order)) {
+            order = "desc";
+        }
+
+        // Unmarshal the stocks, and filter and sort as neeeded
         List<Stock> stocks = StocksFileManager.getInstance().unmarshal().getStocks();
 
         return stocks
@@ -276,6 +315,12 @@ public class ShareBrokering {
             @WebParam(name = "stockSymbol") String stockSymbol,
             @WebParam(name = "availableShares") double availableShares
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(stockName) || isNullOrEmpty(stockSymbol)) {
+            return false;
+        }
+
         // Make sure stock symbol isn't already present in the system
         Stocks stocks = StocksFileManager.getInstance().unmarshal();
         List<Stock> stocksList = stocks.getStocks();
@@ -303,7 +348,7 @@ public class ShareBrokering {
         Stock stock = new Stock();
         stock.setAvailableShares(availableShares);
         stock.setStockName(stockName);
-        stock.setStockSymbol(stockSymbol);
+        stock.setStockSymbol(stockSymbol.toUpperCase());
         stock.setPrice(sharePrice);
 
         // Add the new Stock and marshall
@@ -322,6 +367,12 @@ public class ShareBrokering {
     public boolean deleteShare(
             @WebParam(name = "stockSymbol") String stockSymbol
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(stockSymbol)) {
+            return false;
+        }
+
         // Unmarshall stocks, find the stock with the supplied symbol, remove the stock and remarshall
         Stocks stocks = StocksFileManager.getInstance().unmarshal();
         List<Stock> stocksList = stocks.getStocks();
@@ -363,13 +414,18 @@ public class ShareBrokering {
             if (stock.getStockSymbol().equalsIgnoreCase(currentStockSymbol)) {
                 foundStock = true;
 
-                if (StringUtil.isNotNullOrEmpty(stockName)) {
-                    stock.setStockName(stockName);
+                if (StringUtil.isNotNullOrEmpty(newStockSymbol)) {
+                    // Make sure newStockSymbol is not already present in the system
+                    if (!stock.getStockSymbol().equals(newStockSymbol) && stocksList.stream().anyMatch(s -> s.getStockSymbol().equalsIgnoreCase(newStockSymbol))) {
+                        break;
+                    }
+
+                    stock.setStockSymbol(newStockSymbol);
                     madeEdit = true;
                 }
 
-                if (StringUtil.isNotNullOrEmpty(newStockSymbol)) {
-                    stock.setStockSymbol(newStockSymbol);
+                if (StringUtil.isNotNullOrEmpty(stockName)) {
+                    stock.setStockName(stockName);
                     madeEdit = true;
                 }
 
@@ -407,6 +463,12 @@ public class ShareBrokering {
             @WebParam(name = "password") String password,
             @WebParam(name = "currency") String currency
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(firstName) || isNullOrEmpty(lastName) || isNullOrEmpty(username) || isNullOrEmpty(password) || isNullOrEmpty(currency)) {
+            return false;
+        }
+
         // Make sure username already present in the system
         Users users = UsersFileManager.getInstance().unmarshal();
         List<User> usersList = users.getUsers();
@@ -431,7 +493,7 @@ public class ShareBrokering {
         user.setUsername(username);
         user.setPassword(hashedPassword);
         user.setRole(Role.USER);
-        user.setCurrency(currency);
+        user.setCurrency(currency.toUpperCase());
         user.setAvailableFunds(0);
 
         // Add the new User and marshall
@@ -452,6 +514,12 @@ public class ShareBrokering {
             @WebParam(name = "username") String username,
             @WebParam(name = "password") String password
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(username) || isNullOrEmpty(password)) {
+            return LoginResponse.unsuccessfulResponse();
+        }
+
         // Check username is present in the system
         Users users = UsersFileManager.getInstance().unmarshal();
         List<User> usersList = users.getUsers();
@@ -483,6 +551,12 @@ public class ShareBrokering {
     public FundsResponse getUserFunds(
             @WebParam(name = "guid") String guid
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(guid)) {
+            return null;
+        }
+
         // Check username is present in the system
         Users users = UsersFileManager.getInstance().unmarshal();
         List<User> usersList = users.getUsers();
@@ -509,6 +583,12 @@ public class ShareBrokering {
             @WebParam(name = "guid") String guid,
             @WebParam(name = "amount") double amount
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(guid)) {
+            return false;
+        }
+
         // Disallow depositing negative amounts and zero
         if (amount <= 0) {
             return false;
@@ -542,6 +622,12 @@ public class ShareBrokering {
             @WebParam(name = "guid") String guid,
             @WebParam(name = "amount") double amount
     ) {
+
+        // Validate parameters
+        if (isNullOrEmpty(guid)) {
+            return false;
+        }
+
         // Disallow withdrawing negative amounts and zero
         if (amount <= 0) {
             return false;
@@ -581,7 +667,7 @@ public class ShareBrokering {
             byte[] passwordsBytes = password.getBytes("UTF-8");
             byte[] hashedPasswordBytes = md5.digest(passwordsBytes);
 
-            return DatatypeConverter.printHexBinary(hashedPasswordBytes);
+            return DatatypeConverter.printHexBinary(hashedPasswordBytes).toLowerCase();
         } catch (NoSuchAlgorithmException e) {
             System.err.println("[ShareBrokering JAX-WS] MD5 algorithm not found when hashing user password. " + e.getMessage());
 

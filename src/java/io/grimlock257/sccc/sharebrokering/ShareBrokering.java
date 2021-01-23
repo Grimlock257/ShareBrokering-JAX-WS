@@ -15,7 +15,6 @@ import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
 import io.grimlock257.sccc.sharebrokering.model.FundsResponse;
 import io.grimlock257.sccc.sharebrokering.model.LoginResponse;
 import io.grimlock257.sccc.sharebrokering.model.UserStock;
-import io.grimlock257.sccc.sharebrokering.util.StringUtil;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.containsIgnoreCase;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpty;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNullOrEmpty;
@@ -353,6 +352,9 @@ public class ShareBrokering {
 
         // Add the new Stock and marshall
         stocksList.add(stock);
+
+        // Re-order the list
+        stocksList.sort(Comparator.comparing(Stock::getStockName));
 
         return StocksFileManager.getInstance().marshal(stocks);
     }

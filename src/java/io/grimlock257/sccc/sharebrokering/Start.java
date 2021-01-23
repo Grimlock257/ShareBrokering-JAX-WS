@@ -11,7 +11,9 @@ import io.grimlock257.sccc.sharebrokering.jobs.StockPriceUpdater;
 import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
 import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
@@ -92,6 +94,10 @@ public class Start {
                 stocksList.add(stock);
             }
 
+            // Re-order the list
+            stocksList.sort(Comparator.comparing(Stock::getStockName));
+
+            // Marshal the initial stock list
             StocksFileManager.getInstance().marshal(stocks);
         }
     }

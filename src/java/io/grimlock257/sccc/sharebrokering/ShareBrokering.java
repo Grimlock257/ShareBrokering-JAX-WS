@@ -414,9 +414,9 @@ public class ShareBrokering {
             if (stock.getStockSymbol().equalsIgnoreCase(currentStockSymbol)) {
                 foundStock = true;
 
-                if (StringUtil.isNotNullOrEmpty(newStockSymbol)) {
+                if (isNotNullOrEmpty(newStockSymbol)) {
                     // Make sure newStockSymbol is not already present in the system
-                    if (!stock.getStockSymbol().equals(newStockSymbol) && stocksList.stream().anyMatch(s -> s.getStockSymbol().equalsIgnoreCase(newStockSymbol))) {
+                    if (!currentStockSymbol.equals(newStockSymbol) && stocksList.stream().anyMatch(s -> s.getStockSymbol().equalsIgnoreCase(newStockSymbol))) {
                         break;
                     }
 
@@ -424,7 +424,7 @@ public class ShareBrokering {
                     madeEdit = true;
                 }
 
-                if (StringUtil.isNotNullOrEmpty(stockName)) {
+                if (isNotNullOrEmpty(stockName)) {
                     stock.setStockName(stockName);
                     madeEdit = true;
                 }

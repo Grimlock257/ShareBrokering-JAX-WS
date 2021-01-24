@@ -28,7 +28,7 @@ public class UsersFileManager {
      * Private to enforce singleton behaviour
      */
     private UsersFileManager() {
-        xmlFileLocation = "users.xml";
+        xmlFileLocation = "./sharesBrokering/users.xml";
     }
 
     /**
@@ -64,6 +64,10 @@ public class UsersFileManager {
             // Apply a file lock at this point so that when the file is being marshaled, no other
             // file operations can happen at the same time
             synchronized (fileLock) {
+                // Create the folder if it doesn't already exist
+                File file = new File(xmlFileLocation);
+                file.getParentFile().mkdirs();
+
                 marshaller.marshal(users, new File(xmlFileLocation));
             }
         } catch (JAXBException e) {

@@ -69,9 +69,9 @@ public class CurrencyConverterAPIService {
             // Retrieve the connection input stream and store as a JsonObject
             JsonReader jsonReader = Json.createReader(conn.getInputStream());
             JsonObject jsonObject = jsonReader.readObject();
-            String jsonStatusValue = jsonObject.getJsonString("status").getString();
+            boolean jsonStatusValue = jsonObject.getBoolean("success");
 
-            if (!jsonStatusValue.equalsIgnoreCase("success")) {
+            if (!jsonStatusValue) {
                 return -1;
             }
 

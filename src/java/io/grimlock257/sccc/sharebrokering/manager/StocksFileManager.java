@@ -9,8 +9,8 @@ import javax.xml.bind.Unmarshaller;
 
 /**
  * StocksFileManager
-
- This class handles marshalling and unmarshalling of the stocks XML files
+ *
+ * This class handles marshalling and unmarshalling of the stocks XML files
  *
  * @author Adam Watson
  */
@@ -28,7 +28,7 @@ public class StocksFileManager {
      * Private to enforce singleton behaviour
      */
     private StocksFileManager() {
-        xmlFileLocation = "stocks.xml";
+        xmlFileLocation = "./sharesBrokering/stocks.xml";
     }
 
     /**
@@ -64,6 +64,10 @@ public class StocksFileManager {
             // Apply a file lock at this point so that when the file is being marshaled, no other
             // file operations can happen at the same time
             synchronized (fileLock) {
+                // Create the folder if it doesn't already exist
+                File file = new File(xmlFileLocation);
+                file.getParentFile().mkdirs();
+
                 marshaller.marshal(stocks, new File(xmlFileLocation));
             }
         } catch (JAXBException e) {

@@ -72,30 +72,34 @@ public class StockPriceUpdater {
             public void run() {
                 System.out.println("[ShareBrokering JAX-WS] Updating stock prices...");
 
-                Stocks stocks = StocksFileManager.getInstance().unmarshal();
-                List<Stock> stocksList = stocks.getStocks();
-                
+                // Record whether a modification was made
                 boolean modified = false;
 
-                for (Stock stock : stocksList) {
-                    StockPriceResponse stockPrice;
+                Stocks stocks = StocksFileManager.getInstance().unmarshal();
 
-                    try {
-                        stockPrice = getSharePrice(stock.getStockSymbol());
-                    } catch (WebServiceException e) {
-                        System.err.println("[ShareBrokering JAX-WS] WebServiceException connecting to stock price SOAP service resulting in failure to update stock price for " + stock.getStockSymbol() + ". " + e.getMessage());
+                if (stocks != null) {
+                    List<Stock> stocksList = stocks.getStocks();
 
-                        continue;
+                    for (Stock stock : stocksList) {
+                        StockPriceResponse stockPrice;
+
+                        try {
+                            stockPrice = getSharePrice(stock.getStockSymbol());
+                        } catch (WebServiceException e) {
+                            System.err.println("[ShareBrokering JAX-WS] WebServiceException connecting to stock price SOAP service resulting in failure to update stock price for " + stock.getStockSymbol() + ". " + e.getMessage());
+
+                            continue;
+                        }
+
+                        SharePrice sharePrice = new SharePrice();
+                        sharePrice.setCurrency(stockPrice.getStockCurrency());
+                        sharePrice.setPrice(stockPrice.getStockPrice());
+                        sharePrice.setUpdated(stockPrice.getStockPriceTime());
+
+                        stock.setPrice(sharePrice);
+
+                        modified = true;
                     }
-
-                    SharePrice sharePrice = new SharePrice();
-                    sharePrice.setCurrency(stockPrice.getStockCurrency());
-                    sharePrice.setPrice(stockPrice.getStockPrice());
-                    sharePrice.setUpdated(stockPrice.getStockPriceTime());
-
-                    stock.setPrice(sharePrice);
-                    
-                    modified = true;
                 }
 
                 boolean result = (modified) ? StocksFileManager.getInstance().marshal(stocks) : false;

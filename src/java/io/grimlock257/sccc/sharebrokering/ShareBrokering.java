@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.jws.WebMethod;
@@ -266,6 +265,9 @@ public class ShareBrokering {
                 break;
             case "sharePrice":
                 stocks.sort(Comparator.comparing(stock -> stock.getPrice().getPrice()));
+                break;
+            case "availableShares":
+                stocks.sort(Comparator.comparing(stock -> stock.getAvailableShares()));
                 break;
             default:
                 stocks.sort(Comparator.comparing(stock -> stock.getStockSymbol()));

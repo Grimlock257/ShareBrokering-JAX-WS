@@ -6,14 +6,17 @@ import io.github.grimlock257.stocks.StockPriceSoap;
 import io.grimlock257.sccc.jaxb.binding.SharePrice;
 import io.grimlock257.sccc.jaxb.binding.Stock;
 import io.grimlock257.sccc.jaxb.binding.Stocks;
+import io.grimlock257.sccc.jaxb.binding.users.Role;
+import io.grimlock257.sccc.jaxb.binding.users.User;
 import io.grimlock257.sccc.jaxb.binding.users.Users;
 import io.grimlock257.sccc.sharebrokering.jobs.StockPriceUpdater;
 import io.grimlock257.sccc.sharebrokering.manager.StocksFileManager;
 import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
+import io.grimlock257.sccc.sharebrokering.util.UserUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
@@ -142,7 +145,29 @@ public class Start {
      */
     private void createInitialUsersFile() {
         if (UsersFileManager.getInstance().unmarshal() == null) {
-            UsersFileManager.getInstance().marshal(new Users());
+            // Create new Stocks object that will be marshalled
+            Users users = new Users();
+            List<User> usersList = users.getUsers();
+
+            // Create a admin user - for submission purposes only
+            User user = new User();
+
+            // Create hashed password for this user
+            String hashedPassword = UserUtils.hashPassword("admin");
+
+            user.setGuid(UUID.randomUUID().toString());
+            user.setFirstName("Admin");
+            user.setLastName("Admin");
+            user.setUsername("Admin");
+            user.setPassword(hashedPassword);
+            user.setRole(Role.ADMIN);
+            user.setCurrency("GBP");
+            user.setAvailableFunds(0);
+
+            // Add the new User and marshall
+            usersList.add(user);
+
+            UsersFileManager.getInstance().marshal(users);
         }
     }
 

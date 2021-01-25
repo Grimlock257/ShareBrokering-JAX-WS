@@ -19,9 +19,6 @@ import static io.grimlock257.sccc.sharebrokering.util.StringUtil.containsIgnoreC
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpty;
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNullOrEmpty;
 import io.grimlock257.sccc.sharebrokering.util.UserUtils;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -33,7 +30,6 @@ import javax.ejb.Stateless;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -508,7 +504,7 @@ public class ShareBrokering {
         }
 
         // Create a MD5 hash of the password
-        String hashedPassword = hashPassword(password);
+        String hashedPassword = UserUtils.hashPassword(password);
 
         if (hashedPassword == null) {
             return false;
@@ -559,7 +555,7 @@ public class ShareBrokering {
             User user = usersList.stream().filter(u -> u.getUsername().equalsIgnoreCase(username)).findFirst().get();
 
             // If the user was found, hash the provided input and check against stored file
-            String hashedPassword = hashPassword(password);
+            String hashedPassword = UserUtils.hashPassword(password);
 
             if (user.getPassword().equals(hashedPassword)) {
                 return LoginResponse.successfulResponse(user.getGuid(), user.getRole());
@@ -682,30 +678,6 @@ public class ShareBrokering {
             }
         } catch (NoSuchElementException e) {
             return false;
-        }
-    }
-
-    /**
-     * Hash the provided password using the MD5 algorithm
-     *
-     * @param password The password to hash
-     * @return The hashed password, or null if something went wrong
-     */
-    private String hashPassword(String password) {
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            byte[] passwordsBytes = password.getBytes("UTF-8");
-            byte[] hashedPasswordBytes = md5.digest(passwordsBytes);
-
-            return DatatypeConverter.printHexBinary(hashedPasswordBytes).toLowerCase();
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("[ShareBrokering JAX-WS] MD5 algorithm not found when hashing user password. " + e.getMessage());
-
-            return null;
-        } catch (UnsupportedEncodingException e) {
-            System.err.println("[ShareBrokering JAX-WS] Unsupported encoding when hashing user password. " + e.getMessage());
-
-            return null;
         }
     }
 

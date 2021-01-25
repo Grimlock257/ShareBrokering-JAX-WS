@@ -6,8 +6,12 @@ import io.grimlock257.sccc.jaxb.binding.users.User;
 import io.grimlock257.sccc.jaxb.binding.users.Users;
 import io.grimlock257.sccc.sharebrokering.manager.UsersFileManager;
 import io.grimlock257.sccc.sharebrokering.service.CurrencyConverterAPIService;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Stores methods related to working with user data
@@ -140,5 +144,29 @@ public class UserUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Hash the provided password using the MD5 algorithm
+     *
+     * @param password The password to hash
+     * @return The hashed password, or null if something went wrong
+     */
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] passwordsBytes = password.getBytes("UTF-8");
+            byte[] hashedPasswordBytes = md5.digest(passwordsBytes);
+
+            return DatatypeConverter.printHexBinary(hashedPasswordBytes).toLowerCase();
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("[ShareBrokering JAX-WS] MD5 algorithm not found when hashing user password. " + e.getMessage());
+
+            return null;
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("[ShareBrokering JAX-WS] Unsupported encoding when hashing user password. " + e.getMessage());
+
+            return null;
+        }
     }
 }

@@ -236,11 +236,11 @@ public class ShareBrokering {
 
         // Set defaults
         if (isNullOrEmpty(sortBy)) {
-            sortBy = "stockSymbol";
+            sortBy = "stockName";
         }
 
         if (isNullOrEmpty(order)) {
-            order = "desc";
+            order = "asc";
         }
 
         // Unmarshal the stocks, and filter and sort as neeeded

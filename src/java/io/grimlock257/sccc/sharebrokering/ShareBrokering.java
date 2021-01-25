@@ -20,6 +20,7 @@ import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNotNullOrEmpt
 import static io.grimlock257.sccc.sharebrokering.util.StringUtil.isNullOrEmpty;
 import io.grimlock257.sccc.sharebrokering.util.UserUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -245,7 +246,7 @@ public class ShareBrokering {
         // Unmarshal the stocks, and filter and sort as neeeded
         List<Stock> stocks = StocksFileManager.getInstance().unmarshal().getStocks();
 
-        return stocks
+        stocks = stocks
                 .stream()
                 .filter(stock -> isNotNullOrEmpty(stockName) ? containsIgnoreCase(stock.getStockName(), stockName) : true)
                 .filter(stock -> isNotNullOrEmpty(stockSymbol) ? containsIgnoreCase(stock.getStockSymbol(), stockSymbol) : true)
@@ -253,47 +254,29 @@ public class ShareBrokering {
                 .filter(stock -> isNotNullOrEmpty(sharePriceFilter) && sharePrice >= 0 && sharePriceFilter.equalsIgnoreCase("lessOrEqual") ? (stock.getPrice().getPrice() <= sharePrice) : true)
                 .filter(stock -> isNotNullOrEmpty(sharePriceFilter) && sharePrice >= 0 && sharePriceFilter.equalsIgnoreCase("equal") ? (stock.getPrice().getPrice() == sharePrice) : true)
                 .filter(stock -> isNotNullOrEmpty(sharePriceFilter) && sharePrice >= 0 && sharePriceFilter.equalsIgnoreCase("greaterOrEqual") ? (stock.getPrice().getPrice() >= sharePrice) : true)
-                .sorted(getStockSearchComparator(sortBy, order))
                 .collect(Collectors.toList());
-    }
 
-    /**
-     * Create a Comparator object for comparing Stocks for some given sort field and order method
-     *
-     * @param <T> A Stock object
-     * @param <U> Some comparable property of the Stock object that will be used to sort
-     * @param sortBy The column in which the results should be ordered by
-     * @param order Whether to order the sortBy column ascending or descending
-     * @return The Comparator object that can sort Stocks
-     */
-    private <T, U extends Comparable<U>> Comparator<T> getStockSearchComparator(String sortBy, String order) {
-        // Store a function reference which takes a Stock and returns some Object
-        Function<Stock, ? extends Object> sortFunction;
-
-        // Determine the sort function based on the sortBy parameter
+        // Determine the sort method based on the sortBy parameter
         switch (sortBy) {
             case "stockName":
-                sortFunction = stock -> stock.getStockName();
+                stocks.sort(Comparator.comparing(stock -> stock.getStockName()));
                 break;
             case "shareCurrency":
-                sortFunction = stock -> stock.getPrice().getCurrency();
+                stocks.sort(Comparator.comparing(stock -> stock.getPrice().getCurrency()));
                 break;
             case "sharePrice":
-                sortFunction = stock -> stock.getPrice().getPrice();
+                stocks.sort(Comparator.comparing(stock -> stock.getPrice().getPrice()));
                 break;
             default:
-                sortFunction = stock -> stock.getStockSymbol();
+                stocks.sort(Comparator.comparing(stock -> stock.getStockSymbol()));
         }
 
-        // Cast the sort function back to a fully generic sort function, as requried by the Comparator.comparing function
-        Function<T, U> genericSortFunction = (Function<T, U>) sortFunction;
-
-        // Return a comparator using the sort function determined above, reverse if the order is set to "desc"
-        if (isNotNullOrEmpty(order) && order.equalsIgnoreCase("desc")) {
-            return Comparator.comparing(genericSortFunction).reversed();
-        } else {
-            return Comparator.comparing(genericSortFunction);
+        // If order is set to desc, reverse the list order
+        if (order.equalsIgnoreCase("desc")) {
+            Collections.reverse(stocks);
         }
+
+        return stocks;
     }
 
     /**
